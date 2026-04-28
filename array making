@@ -1,0 +1,47 @@
+#include <stdio.h>
+
+long long solve() {
+    int N;
+    if (scanf("%d", &N) != 1) return -1;
+    
+    long long A[N];
+    long long sum = 0;
+    long long max_val = 0;
+    
+    for (int i = 0; i < N; i++) {
+        scanf("%lld", &A[i]);
+        sum += A[i];
+        if (A[i] > max_val) {
+            max_val = A[i];
+        }
+    }
+    
+    // Case where N=1: If A[0] is 0, 0 ops. If A[0] > 0, impossible 
+    // because you can't choose N-1 (0) distinct indices to add 1.
+    if (N == 1) {
+        return (sum == 0) ? 0 : -1;
+    }
+    
+    // Total sum must be divisible by (N - 1)
+    if (sum % (N - 1) != 0) {
+        return -1;
+    }
+    
+    long long K = sum / (N - 1);
+    
+    // Each A[i] must be <= K because A[i] = K - (times_skipped[i])
+    if (max_val > K) {
+        return -1;
+    }
+    
+    return K;
+}
+
+int main() {
+    int T;
+    if (scanf("%d", &T) != 1) return 0;
+    while (T--) {
+        printf("%lld\n", solve());
+    }
+    return 0;
+}
