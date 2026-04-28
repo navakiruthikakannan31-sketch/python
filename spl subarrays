@@ -1,0 +1,41 @@
+import sys
+
+def solve():
+    # Increase recursion depth for deep Tries
+    sys.setrecursionlimit(10**6)
+    
+    try:
+        line = sys.stdin.readline()
+        if not line: return
+        n = int(line.strip())
+    except EOFError:
+        return
+
+    # Trie structure: each node is a dictionary {char: next_node}
+    # We also store the count of zeros encountered on the path to that node
+    trie = {}
+    MOD = 10**9 + 7
+    total_sum = 0
+
+    for _ in range(n):
+        s = sys.stdin.readline().strip()
+        curr = trie
+        zeros_so_far = 0
+        
+        for char in s:
+            if char == '0':
+                zeros_so_far += 1
+            
+            if char not in curr:
+                # This is a new unique prefix
+                curr[char] = [{}, zeros_so_far]
+                # Count special subarrays: (zeros - 1) if zeros > 1
+                if zeros_so_far > 1:
+                    total_sum = (total_sum + (zeros_so_far - 1)) % MOD
+            
+            # Move to the next node
+            curr = curr[char][0]
+
+    print(total_sum)
+
+solve()
