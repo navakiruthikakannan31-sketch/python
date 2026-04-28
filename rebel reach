@@ -1,0 +1,73 @@
+import sys
+sys.setrecursionlimit(200000)
+
+def solve():
+    try:
+        line1 = sys.stdin.readline().split()
+        if not line1: return
+        n = int(line1[0])
+    except EOFError: return
+
+    adj = [[] for _ in range(n + 1)]
+    for _ in range(n - 1):
+        u, v = map(int, sys.stdin.readline().split())
+        adj[u].append(v)
+        adj[v].append(u)
+
+    guards = [0] + list(map(int, sys.stdin.readline().split()))
+    
+    # DFS to get parent, depth, and prefix sums
+    parent = [0] * (n + 1)
+    depth = [0] * (n + 1)
+    s = [0] * (n + 1)
+    order = []
+    stack = [1]
+    visited = [False] * (n + 1)
+    visited[1] = True
+    s[1] = guards[1]
+    
+    while stack:
+        u = stack.pop()
+        order.append(u)
+        for v in adj[u]:
+            if not visited[v]:
+                visited[v] = True
+                parent[v] = u
+                depth[v] = depth[u] + 1
+                s[v] = s[u] + guards[v]
+                stack.append(v)
+
+    # Binary lifting table
+    up = [[0] * 20 for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        up[i][0] = parent[i]
+    for j in range(1, 20):
+        for i in range(1, n + 1):
+            up[i][j] = up[up[i][j-1]][j-1]
+
+    q_count = int(sys.stdin.readline())
+    for _ in range(q_count):
+        u, x = map(int, sys.stdin.readline().split())
+        
+        # If they can reach city 1
+        if s[u] < x:
+            print(1)
+            continue
+            
+        # Binary search for highest reachable ancestor
+        curr = u
+        for j in range(19, -1, -1):
+            anc = up[curr][j]
+            if anc != 0:
+                # Sum of guards from U to 'anc' is s[u] - s[parent[anc]]
+                if s[u] - s[parent[anc]] < x:
+                    curr = anc
+        
+        # curr is the highest ancestor rebels can reach
+        # However, we need to check if they can actually reach curr's parent
+        # The loop above finds the highest 'curr' such that sum(U -> curr) < X
+        print(curr)
+
+t = int(sys.stdin.readline())
+for _ in range(t):
+    solve()
